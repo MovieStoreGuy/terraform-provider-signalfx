@@ -22,10 +22,6 @@ func TimeZoneLocation() schema.SchemaValidateDiagFunc {
 			)
 		}
 		_, err := time.LoadLocation(tz)
-
-		if err == nil {
-			return nil
-		}
 		return tfext.AsErrorDiagnostics(err, p)
 
 	}
