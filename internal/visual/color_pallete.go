@@ -1,10 +1,5 @@
 package visual
 
-import (
-	"maps"
-	"slices"
-)
-
 type ColorPallete map[string]int
 
 func NewPalleteColors() ColorPallete {
@@ -61,9 +56,9 @@ func (p ColorPallete) GetColorCode(val string) (int, bool) {
 
 func (p ColorPallete) Colors() []string {
 	// This will ensure that colors are returned in color code order
-	colors := slices.Collect(maps.Keys(p))
-	slices.SortFunc(colors, func(a, b string) int {
-		return p[a] - p[b]
-	})
+	colors := make([]string, len(p))
+	for c, i := range p {
+		colors[i] = c
+	}
 	return colors
 }
