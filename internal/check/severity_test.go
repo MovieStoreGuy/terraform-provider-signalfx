@@ -20,7 +20,7 @@ func TestSeverityLevel(t *testing.T) {
 			name: "No value provided",
 			val:  nil,
 			expect: diag.Diagnostics{
-				{Severity: diag.Error, Summary: "expected <nil> to be of type string"},
+				{Severity: diag.Error, Summary: "expected <nil> to be of type string", AttributePath: cty.Path{}},
 			},
 		},
 		{

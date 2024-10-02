@@ -1,6 +1,8 @@
 package check
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -12,10 +14,22 @@ func Notification() schema.SchemaValidateDiagFunc {
 	return func(i interface{}, p cty.Path) diag.Diagnostics {
 		s, ok := i.(string)
 		if !ok {
-			return diag.Errorf("expected %v to be of type string", i)
+			return diag.Diagnostics{
+				{
+					Severity:      diag.Error,
+					Summary:       fmt.Sprintf("expected %v to be of type string", i),
+					AttributePath: p,
+				},
+			}
 		}
 		// Using the helper library to avoid repeating code
 		_, err := notificationhelper.NewNotificationFromString(s)
-		return diag.FromErr(err)
+		if err == nil {
+			return nil
+		}
+
+		return diag.Diagnostics{
+			{Severity: diag.Error, Summary: err.Error(), AttributePath: p},
+		}
 	}
 }
