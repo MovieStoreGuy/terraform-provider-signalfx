@@ -21,9 +21,8 @@ func TestValueUnit(t *testing.T) {
 			value: nil,
 			expected: diag.Diagnostics{
 				diag.Diagnostic{
-					Severity:      diag.Error,
-					Summary:       "expected <nil> to be type string",
-					AttributePath: cty.Path{},
+					Severity: diag.Error,
+					Summary:  "expected <nil> to be type string",
 				},
 			},
 		},
@@ -37,9 +36,8 @@ func TestValueUnit(t *testing.T) {
 			value: "Tuesday",
 			expected: diag.Diagnostics{
 				{
-					Severity:      diag.Error,
-					Summary:       "expected \"Tuesday\" to be one of [Bit Kilobit Megabit Gigabit Terabit Petabit Exabit Zettabit Yottabit Byte Kibibyte Mebibyte Gibibyte Tebibyte Pebibyte Exbibyte Zebibyte Yobibyte Nanosecond Microsecond Millisecond Second Minute Hour Day Week]",
-					AttributePath: cty.Path{},
+					Severity: diag.Error,
+					Summary:  "expected \"Tuesday\" to be one of [Bit Kilobit Megabit Gigabit Terabit Petabit Exabit Zettabit Yottabit Byte Kibibyte Mebibyte Gibibyte Tebibyte Pebibyte Exbibyte Zebibyte Yobibyte Nanosecond Microsecond Millisecond Second Minute Hour Day Week]",
 				},
 			},
 		},

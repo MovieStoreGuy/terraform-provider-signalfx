@@ -21,7 +21,7 @@ func TestColorValue(t *testing.T) {
 			name: "no value provided",
 			val:  nil,
 			expect: diag.Diagnostics{
-				{Severity: diag.Error, Summary: "expected <nil> to be type string", AttributePath: cty.Path{}},
+				{Severity: diag.Error, Summary: "expected <nil> to be type string"},
 			},
 		},
 		{
@@ -34,9 +34,8 @@ func TestColorValue(t *testing.T) {
 			val:  "spacegrey",
 			expect: diag.Diagnostics{
 				{
-					Severity:      diag.Error,
-					Summary:       "value \"spacegrey\" must be one of [gray blue azure navy brown orange yellow magenta purple pink violet lilac iris emerald green aquamarine red gold greenyellow chartreuse jade]",
-					AttributePath: cty.Path{},
+					Severity: diag.Error,
+					Summary:  "value \"spacegrey\" must be one of [gray blue azure navy brown orange yellow magenta purple pink violet lilac iris emerald green aquamarine red gold greenyellow chartreuse jade]",
 				},
 			},
 		},

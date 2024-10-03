@@ -20,7 +20,7 @@ func TestTimeZoneLocation(t *testing.T) {
 			name: "no value provided",
 			val:  nil,
 			expect: diag.Diagnostics{
-				{Severity: diag.Error, Summary: "expected <nil> as string", AttributePath: cty.Path{}},
+				{Severity: diag.Error, Summary: "expected <nil> as string"},
 			},
 		},
 		{
@@ -37,7 +37,7 @@ func TestTimeZoneLocation(t *testing.T) {
 			name: "Invalid tz location set",
 			val:  "planet/earth",
 			expect: diag.Diagnostics{
-				{Severity: diag.Error, Summary: "unknown time zone planet/earth", AttributePath: cty.Path{}},
+				{Severity: diag.Error, Summary: "unknown time zone planet/earth"},
 			},
 		},
 	} {

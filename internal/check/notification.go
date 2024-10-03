@@ -8,28 +8,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/splunk-terraform/terraform-provider-signalfx/internal/definition/notification/notificationhelper"
+	tfext "github.com/splunk-terraform/terraform-provider-signalfx/internal/tfextension"
 )
 
 func Notification() schema.SchemaValidateDiagFunc {
 	return func(i interface{}, p cty.Path) diag.Diagnostics {
 		s, ok := i.(string)
 		if !ok {
-			return diag.Diagnostics{
-				{
-					Severity:      diag.Error,
-					Summary:       fmt.Sprintf("expected %v to be of type string", i),
-					AttributePath: p,
-				},
-			}
+			return tfext.AsErrorDiagnostics(
+				fmt.Errorf("expected %v to be of type string", i),
+				p,
+			)
 		}
 		// Using the helper library to avoid repeating code
 		_, err := notificationhelper.NewNotificationFromString(s)
 		if err == nil {
 			return nil
 		}
-
-		return diag.Diagnostics{
-			{Severity: diag.Error, Summary: err.Error(), AttributePath: p},
-		}
+		return tfext.AsErrorDiagnostics(err, p)
 	}
 }

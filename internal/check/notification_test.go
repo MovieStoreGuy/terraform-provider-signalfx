@@ -20,14 +20,14 @@ func TestNotification(t *testing.T) {
 			name: "no value provided",
 			val:  nil,
 			expect: diag.Diagnostics{
-				{Severity: diag.Error, Summary: "expected <nil> to be of type string", AttributePath: cty.Path{}},
+				{Severity: diag.Error, Summary: "expected <nil> to be of type string"},
 			},
 		},
 		{
 			name: "incomplete notification string",
 			val:  "notification",
 			expect: diag.Diagnostics{
-				{Severity: diag.Error, Summary: `invalid notification string "notification", not enough commas`, AttributePath: cty.Path{}},
+				{Severity: diag.Error, Summary: `invalid notification string "notification", not enough commas`},
 			},
 		},
 		{
@@ -84,7 +84,7 @@ func TestNotification(t *testing.T) {
 			name: "email invalid",
 			val:  "Email,derp",
 			expect: diag.Diagnostics{
-				{Severity: diag.Error, Summary: "mail: missing '@' or angle-addr", AttributePath: cty.Path{}},
+				{Severity: diag.Error, Summary: "mail: missing '@' or angle-addr"},
 			},
 		},
 		{
@@ -97,9 +97,8 @@ func TestNotification(t *testing.T) {
 			val:  "Opsgenie,",
 			expect: diag.Diagnostics{
 				{
-					Severity:      diag.Error,
-					Summary:       "invalid OpsGenie notification string, please consult the documentation (not enough parts)",
-					AttributePath: cty.Path{},
+					Severity: diag.Error,
+					Summary:  "invalid OpsGenie notification string, please consult the documentation (not enough parts)",
 				},
 			},
 		},
@@ -113,9 +112,8 @@ func TestNotification(t *testing.T) {
 			val:  "Slack,",
 			expect: diag.Diagnostics{
 				{
-					Severity:      diag.Error,
-					Summary:       "invalid Slack notification string, please consult the documentation (not enough parts)",
-					AttributePath: cty.Path{},
+					Severity: diag.Error,
+					Summary:  "invalid Slack notification string, please consult the documentation (not enough parts)",
 				},
 			},
 		},
@@ -124,9 +122,8 @@ func TestNotification(t *testing.T) {
 			val:  "Slack,,#channel",
 			expect: diag.Diagnostics{
 				{
-					Severity:      diag.Error,
-					Summary:       `exclude the # from channel names in "#channel"`,
-					AttributePath: cty.Path{},
+					Severity: diag.Error,
+					Summary:  `exclude the # from channel names in "#channel"`,
 				},
 			},
 		},
@@ -140,9 +137,8 @@ func TestNotification(t *testing.T) {
 			val:  "VictorOps,",
 			expect: diag.Diagnostics{
 				{
-					Severity:      diag.Error,
-					Summary:       "invalid VictorOps notification string, please consult the documentation (not enough parts)",
-					AttributePath: cty.Path{},
+					Severity: diag.Error,
+					Summary:  "invalid VictorOps notification string, please consult the documentation (not enough parts)",
 				},
 			},
 		},
@@ -161,9 +157,8 @@ func TestNotification(t *testing.T) {
 			val:  "Webhook,,",
 			expect: diag.Diagnostics{
 				{
-					Severity:      diag.Error,
-					Summary:       "invalid Webhook notification string, please consult the documentation (not enough parts)",
-					AttributePath: cty.Path{},
+					Severity: diag.Error,
+					Summary:  "invalid Webhook notification string, please consult the documentation (not enough parts)",
 				},
 			},
 		},
@@ -172,9 +167,8 @@ func TestNotification(t *testing.T) {
 			val:  "Webhook,,,",
 			expect: diag.Diagnostics{
 				{
-					Severity:      diag.Error,
-					Summary:       "invalid Webhook notification string, please consult the documentation (use one of URL and secret or credential id)",
-					AttributePath: cty.Path{},
+					Severity: diag.Error,
+					Summary:  "invalid Webhook notification string, please consult the documentation (use one of URL and secret or credential id)",
 				},
 			},
 		},
@@ -183,9 +177,8 @@ func TestNotification(t *testing.T) {
 			val:  "Webhook,aaa,mysecret,http://example.com",
 			expect: diag.Diagnostics{
 				{
-					Severity:      diag.Error,
-					Summary:       "invalid Webhook notification string, please consult the documentation (use one of URL and secret or credential id)",
-					AttributePath: cty.Path{},
+					Severity: diag.Error,
+					Summary:  "invalid Webhook notification string, please consult the documentation (use one of URL and secret or credential id)",
 				},
 			},
 		},
@@ -193,14 +186,14 @@ func TestNotification(t *testing.T) {
 			name: "Webhook url invalid",
 			val:  "Webhook,,verysercretsecret,foo",
 			expect: diag.Diagnostics{
-				{Severity: diag.Error, Summary: "invalid Webhook URL \"verysercretsecret\"", AttributePath: cty.Path{}},
+				{Severity: diag.Error, Summary: "invalid Webhook URL \"verysercretsecret\""},
 			},
 		},
 		{
 			name: "Unknown notification",
 			val:  "alertatron,",
 			expect: diag.Diagnostics{
-				{Severity: diag.Error, Summary: "invalid notification type \"alertatron\"", AttributePath: cty.Path{}},
+				{Severity: diag.Error, Summary: "invalid notification type \"alertatron\""},
 			},
 		},
 	} {
