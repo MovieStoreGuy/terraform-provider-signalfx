@@ -43,9 +43,16 @@ type ResourceOperationTestCase[T any] struct {
 func (tc ResourceOperationTestCase[T]) TestCreate(t *testing.T) {
 	_, resource := tc.Definintion.New()
 
-	var operation schema.CreateContextFunc = func(_ context.Context, rd *schema.ResourceData, meta any) diag.Diagnostics {
-		//nolint // This method is deprecated but is still used by some resources
-		return diag.FromErr(resource.Create(rd, meta))
+	var operation schema.CreateContextFunc = func(ctx context.Context, rd *schema.ResourceData, i interface{}) diag.Diagnostics {
+		return diag.Errorf("no create operation defined")
+	}
+
+	//nolint // This method is deprecated but is still used by some resources
+	if !reflect.ValueOf(resource.Create).IsNil() {
+		operation = func(_ context.Context, rd *schema.ResourceData, meta any) diag.Diagnostics {
+			//nolint // This method is deprecated but is still used by some resources
+			return diag.FromErr(resource.Create(rd, meta))
+		}
 	}
 
 	if !reflect.ValueOf(resource.CreateContext).IsNil() {
@@ -66,9 +73,16 @@ func (tc ResourceOperationTestCase[T]) TestCreate(t *testing.T) {
 func (tc ResourceOperationTestCase[T]) TestRead(t *testing.T) {
 	_, resource := tc.Definintion.New()
 
-	var operation schema.ReadContextFunc = func(_ context.Context, rd *schema.ResourceData, meta any) diag.Diagnostics {
-		//nolint // This method is deprecated but is still used by some resources
-		return diag.FromErr(resource.Read(rd, meta))
+	var operation schema.ReadContextFunc = func(ctx context.Context, rd *schema.ResourceData, i interface{}) diag.Diagnostics {
+		return diag.Errorf("no read operation defined")
+	}
+
+	//nolint // This method is deprecated but is still used by some resources
+	if !reflect.ValueOf(resource.Read).IsNil() {
+		operation = func(_ context.Context, rd *schema.ResourceData, meta any) diag.Diagnostics {
+			//nolint // This method is deprecated but is still used by some resources
+			return diag.FromErr(resource.Read(rd, meta))
+		}
 	}
 
 	if !reflect.ValueOf(resource.ReadContext).IsNil() {
@@ -87,9 +101,16 @@ func (tc ResourceOperationTestCase[T]) TestRead(t *testing.T) {
 func (tc ResourceOperationTestCase[T]) TestUpdate(t *testing.T) {
 	_, resource := tc.Definintion.New()
 
-	var operation schema.UpdateContextFunc = func(_ context.Context, rd *schema.ResourceData, meta any) diag.Diagnostics {
-		//nolint // This method is deprecated but is still used by some resources
-		return diag.FromErr(resource.Update(rd, meta))
+	var operation schema.UpdateContextFunc = func(ctx context.Context, rd *schema.ResourceData, i interface{}) diag.Diagnostics {
+		return diag.Errorf("no update operation defined")
+	}
+
+	//nolint // This method is deprecated but is still used by some resources
+	if !reflect.ValueOf(resource.Update).IsNil() {
+		operation = func(_ context.Context, rd *schema.ResourceData, meta any) diag.Diagnostics {
+			//nolint // This method is deprecated but is still used by some resources
+			return diag.FromErr(resource.Update(rd, meta))
+		}
 	}
 
 	if !reflect.ValueOf(resource.UpdateContext).IsNil() {
@@ -108,9 +129,16 @@ func (tc ResourceOperationTestCase[T]) TestUpdate(t *testing.T) {
 func (tc ResourceOperationTestCase[T]) TestDelete(t *testing.T) {
 	_, resource := tc.Definintion.New()
 
-	var operation schema.DeleteContextFunc = func(_ context.Context, rd *schema.ResourceData, meta any) diag.Diagnostics {
-		//nolint // This method is deprecated but is still used by some resources
-		return diag.FromErr(resource.Delete(rd, meta))
+	var operation schema.DeleteContextFunc = func(ctx context.Context, rd *schema.ResourceData, i interface{}) diag.Diagnostics {
+		return diag.Errorf("no delete operation defined")
+	}
+
+	//nolint // This method is deprecated but is still used by some resources
+	if !reflect.ValueOf(resource.Delete).IsNil() {
+		operation = func(_ context.Context, rd *schema.ResourceData, meta any) diag.Diagnostics {
+			//nolint // This method is deprecated but is still used by some resources
+			return diag.FromErr(resource.Delete(rd, meta))
+		}
 	}
 
 	if !reflect.ValueOf(resource.DeleteContext).IsNil() {
