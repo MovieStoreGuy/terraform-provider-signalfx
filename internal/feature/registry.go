@@ -8,9 +8,12 @@ import (
 	"fmt"
 	"iter"
 	"regexp"
+	"slices"
+	"strings"
 	"sync"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"golang.org/x/mod/semver"
 
 	tfext "github.com/splunk-terraform/terraform-provider-signalfx/internal/tfextension"
 )
@@ -23,11 +26,27 @@ func NewRegistry() *Registry {
 	return &Registry{}
 }
 
+// All returns a iterator that is ordered by semver version, and the feature name
 func (r *Registry) All() iter.Seq2[string, *Preview] {
+	var previews []*Preview
+	r.features.Range(func(_, value any) bool {
+		previews = append(previews, value.(*Preview))
+		return true
+	})
+
+	slices.SortFunc(previews, func(a, b *Preview) int {
+		if cmp := semver.Compare(a.Introduced(), b.Introduced()); cmp != 0 {
+			return cmp
+		}
+		return strings.Compare(a.Name(), b.Name())
+	})
+
 	return func(yield func(string, *Preview) bool) {
-		r.features.Range(func(key, value any) bool {
-			return yield(key.(string), value.(*Preview))
-		})
+		for _, p := range previews {
+			if !yield(p.Name(), p) {
+				return
+			}
+		}
 	}
 }
 
@@ -80,7 +99,7 @@ func (reg *Registry) Register(feature string, opts ...PreviewOption) (*Preview, 
 		return nil, fmt.Errorf("feature %q does not match expected naming format", feature)
 	}
 
-	g, err := NewPreview(opts...)
+	g, err := NewPreview(feature, opts...)
 	if err != nil {
 		return nil, err
 	}

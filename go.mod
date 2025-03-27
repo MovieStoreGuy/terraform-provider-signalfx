@@ -13,6 +13,7 @@ require (
 	github.com/signalfx/signalfx-go v1.46.0
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/multierr v1.11.0
+	golang.org/x/mod v0.22.0
 )
 
 require (
@@ -56,7 +57,6 @@ require (
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/zclconf/go-cty v1.16.2 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
-	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/net v0.37.0 // indirect
 	golang.org/x/oauth2 v0.23.0 // indirect
 	golang.org/x/sync v0.12.0 // indirect

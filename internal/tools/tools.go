@@ -14,4 +14,6 @@ import (
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
 	_ "github.com/google/addlicense"
 	_ "golang.org/x/vuln/cmd/govulncheck"
+
+	_ "github.com/splunk-terraform/terraform-provider-signalfx/cmd/doc-feature-preview"
 )

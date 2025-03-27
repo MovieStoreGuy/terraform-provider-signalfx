@@ -11,9 +11,10 @@ TOOLS_MOD_REGEX := "\s+_\s+\".*\""
 TOOLS_PKG_NAMES := $(shell grep -E $(TOOLS_MOD_REGEX) < $(TOOLS_MOD_DIR)/tools.go | tr -d " _\"" | grep -vE '/v[0-9]+$$')
 TOOLS_BIN_NAMES := $(addprefix $(TOOLS_BIN_DIR)/, $(notdir $(shell echo $(TOOLS_PKG_NAMES))))
 
-ADDLICENCESE  := $(TOOLS_BIN_DIR)/addlicense
-GOVULNCHECK   := $(TOOLS_BIN_DIR)/govulncheck
-GOLANGCI_LINT := $(TOOLS_BIN_DIR)/golangci-lint
+ADDLICENCESE         := $(TOOLS_BIN_DIR)/addlicense
+GOVULNCHECK          := $(TOOLS_BIN_DIR)/govulncheck
+GOLANGCI_LINT        := $(TOOLS_BIN_DIR)/golangci-lint
+DOC_FEATURE_PREVIEW  := $(TOOLS_BIN_DIR)/doc-feature-preview
 
 default: build
 
@@ -64,6 +65,9 @@ lint-fix:
 build:
 	go build
 
+generate: $(DOC_FEATURE_PREVIEW)
+	go generate -x ./...
+
 test:
 	go test --cover --race -v --timeout 30s ./...
 
@@ -104,4 +108,7 @@ ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck  test-compile website website-test
+clean:
+	$(RM) -r .tools
+
+.PHONY: build test testacc vet fmt fmtcheck errcheck  test-compile website website-test clean

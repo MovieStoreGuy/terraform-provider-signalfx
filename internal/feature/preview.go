@@ -19,14 +19,16 @@ import "sync/atomic"
 type Preview struct {
 	_ struct{} // Enforce explicy key assignment
 
+	name        string
 	enabled     *atomic.Bool
 	available   bool
 	description string
 	introduced  string
 }
 
-func NewPreview(opts ...PreviewOption) (*Preview, error) {
+func NewPreview(name string, opts ...PreviewOption) (*Preview, error) {
 	p := &Preview{
+		name:    name,
 		enabled: new(atomic.Bool),
 	}
 
@@ -37,6 +39,10 @@ func NewPreview(opts ...PreviewOption) (*Preview, error) {
 	}
 
 	return p, nil
+}
+
+func (p Preview) Name() string {
+	return p.name
 }
 
 func (p Preview) Enabled() bool {

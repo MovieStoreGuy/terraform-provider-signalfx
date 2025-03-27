@@ -13,9 +13,10 @@ import (
 func TestNewDefaultPreview(t *testing.T) {
 	t.Parallel()
 
-	p, err := NewPreview()
+	p, err := NewPreview("example")
 	require.NoError(t, err, "Must not error when creating a default preview")
 
+	assert.Equal(t, "example", p.Name(), "Must match the expected name")
 	assert.False(t, p.Enabled(), "Must be disabled by default")
 	assert.False(t, p.GlobalAvailable(), "Must be disabled by default")
 	assert.Equal(t, "", p.Description(), "Must have no description by default")

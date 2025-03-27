@@ -1,6 +1,7 @@
 // Copyright Splunk, Inc.
 // SPDX-License-Identifier: MPL-2.0
-
+//
+//go:generate ./.tools/doc-feature-preview website/docs/feature-preview.md
 package main
 
 import (

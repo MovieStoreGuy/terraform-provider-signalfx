@@ -6,7 +6,8 @@ package feature
 import (
 	"errors"
 	"fmt"
-	"regexp"
+
+	"golang.org/x/mod/semver"
 )
 
 type PreviewOption func(g *Preview) error
@@ -28,12 +29,8 @@ func WithPreviewGlobalAvailable() PreviewOption {
 
 func WithPreviewAddInVersion(version string) PreviewOption {
 	return func(g *Preview) error {
-		matched, err := regexp.MatchString(`^v[1-9]+\.[0-9]+`, version)
-		if err != nil {
-			return err
-		}
-		if !matched {
-			return fmt.Errorf("version string %q needs to be in format vX.Y[.+]", version)
+		if !semver.IsValid(version) {
+			return fmt.Errorf("version string %q needs to be in semver format", version)
 		}
 		g.introduced = version
 		return nil
