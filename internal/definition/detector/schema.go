@@ -11,6 +11,7 @@ import (
 
 	"github.com/splunk-terraform/terraform-provider-signalfx/internal/check"
 	"github.com/splunk-terraform/terraform-provider-signalfx/internal/common"
+	"github.com/splunk-terraform/terraform-provider-signalfx/internal/convert"
 	"github.com/splunk-terraform/terraform-provider-signalfx/internal/definition/rule"
 	tfext "github.com/splunk-terraform/terraform-provider-signalfx/internal/tfextension"
 	"github.com/splunk-terraform/terraform-provider-signalfx/internal/visual"
@@ -196,23 +197,29 @@ func newSchema() map[string]*schema.Schema {
 
 func decodeTerraform(rd *schema.ResourceData) (*detector.Detector, error) {
 	d := &detector.Detector{
-		Id:                rd.Id(),
-		Name:              rd.Get("name").(string),
-		Description:       rd.Get("description").(string),
-		ProgramText:       rd.Get("program_text").(string),
-		TimeZone:          rd.Get("timezone").(string),
-		DetectorOrigin:    rd.Get("detector_origin").(string),
-		ParentDetectorId:  rd.Get("parent_detector_id").(string),
-		AuthorizedWriters: &detector.AuthorizedWriters{},
+		Id:               rd.Id(),
+		Name:             rd.Get("name").(string),
+		Description:      rd.Get("description").(string),
+		ProgramText:      rd.Get("program_text").(string),
+		TimeZone:         rd.Get("timezone").(string),
+		DetectorOrigin:   rd.Get("detector_origin").(string),
+		ParentDetectorId: rd.Get("parent_detector_id").(string),
+		AuthorizedWriters: &detector.AuthorizedWriters{
+			Teams: convert.SchemaListAll(rd.Get("authorized_writer_teams"), convert.ToString),
+			Users: convert.SchemaListAll(rd.Get("authorized_writer_users"), convert.ToString),
+		},
 		//nolint:gosec // Overflow is not possible from config
 		MinDelay: common.AsPointer(int32(rd.Get("min_delay").(int)) * 1000),
 		//nolint:gosec // Overflow is not possible from config
 		MaxDelay: common.AsPointer(int32(rd.Get("max_delay").(int)) * 1000),
 		VisualizationOptions: &detector.Visualization{
-			DisableSampling: rd.Get("disable_sampling").(bool),
-			ShowDataMarkers: rd.Get("show_data_markers").(bool),
-			ShowEventLines:  rd.Get("show_event_lines").(bool),
+			DisableSampling:     rd.Get("disable_sampling").(bool),
+			ShowDataMarkers:     rd.Get("show_data_markers").(bool),
+			ShowEventLines:      rd.Get("show_event_lines").(bool),
+			PublishLabelOptions: convert.SchemaListAll(rd.Get("viz_options"), convert.ToDetectorPublishLabelOptions),
 		},
+		Teams: convert.SchemaListAll(rd.Get("teams"), convert.ToString),
+		Tags:  convert.SchemaListAll(rd.Get("tags"), convert.ToString),
 	}
 
 	if tr, ok := rd.GetOk("time_range"); ok {
@@ -231,42 +238,11 @@ func decodeTerraform(rd *schema.ResourceData) (*detector.Detector, error) {
 
 	}
 
-	for field, ref := range map[string]*[]string{
-		"teams":                   &d.Teams,
-		"tags":                    &d.Tags,
-		"authorized_writer_teams": &d.AuthorizedWriters.Teams,
-		"authorized_writer_users": &d.AuthorizedWriters.Users,
-	} {
-		if values, exist := rd.GetOk(field); exist {
-			for _, v := range values.(*schema.Set).List() {
-				(*ref) = append((*ref), v.(string))
-			}
-		}
-	}
-
 	rules, err := rule.DecodeTerraform(rd)
 	if err != nil {
 		return nil, err
 	}
 	d.Rules = rules
-
-	palette := visual.NewColorPalette()
-	for _, data := range rd.Get("viz_options").(*schema.Set).List() {
-		viz := data.(map[string]any)
-		opt := &detector.PublishLabelOptions{
-			Label:       viz["label"].(string),
-			DisplayName: viz["display_name"].(string),
-			ValueUnit:   viz["value_unit"].(string),
-			ValuePrefix: viz["value_prefix"].(string),
-			ValueSuffix: viz["value_suffix"].(string),
-		}
-
-		if idx, ok := palette.ColorIndex(viz["color"].(string)); ok {
-			opt.PaletteIndex = common.AsPointer(idx)
-		}
-
-		d.VisualizationOptions.PublishLabelOptions = append(d.VisualizationOptions.PublishLabelOptions, opt)
-	}
 
 	return d, nil
 }

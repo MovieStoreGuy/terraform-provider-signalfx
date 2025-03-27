@@ -16,32 +16,28 @@ func TestSchemaListAll(t *testing.T) {
 	for _, tc := range []struct {
 		name   string
 		schema *schema.Set
-		F      Func[any, any]
 		expect []any
 	}{
 		{
 			name:   "nil set",
 			schema: nil,
-			F:      func(s any) any { return s },
 			expect: nil,
 		},
 		{
 			name:   "no values set",
 			schema: schema.NewSet(schema.HashInt, nil),
-			F:      func(s any) any { return s },
-			expect: []any{},
+			expect: nil,
 		},
 		{
 			name:   "int set",
 			schema: schema.NewSet(schema.HashInt, []any{1, 2}),
-			F:      func(s any) any { return s },
 			expect: []any{1, 2},
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			assert.Equal(t, tc.expect, SchemaListAll(tc.schema, tc.F))
+			assert.Equal(t, tc.expect, SchemaListAll(tc.schema, ToAny))
 		})
 	}
 }
