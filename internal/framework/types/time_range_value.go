@@ -59,6 +59,11 @@ func (tr TimeRange) ValidateParameter(ctx context.Context, req function.Validate
 	}
 }
 
+func (tr TimeRange) ValueDuration() time.Duration {
+	dur, _ := tr.ParseDuration()
+	return dur
+}
+
 func (tr TimeRange) ParseDuration() (time.Duration, error) {
 	var (
 		units = map[rune]time.Duration{
