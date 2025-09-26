@@ -28,6 +28,7 @@ import (
 	"github.com/splunk-terraform/terraform-provider-signalfx/internal/framework/fwerr"
 	fwshared "github.com/splunk-terraform/terraform-provider-signalfx/internal/framework/shared"
 	fwtypes "github.com/splunk-terraform/terraform-provider-signalfx/internal/framework/types"
+	fwvalidator "github.com/splunk-terraform/terraform-provider-signalfx/internal/framework/validator"
 	pmeta "github.com/splunk-terraform/terraform-provider-signalfx/internal/providermeta"
 )
 
@@ -238,13 +239,21 @@ func (rdw *ResourceDashboardWireframe) Schema(_ context.Context, _ resource.Sche
 								"min_resolution": schema.StringAttribute{
 									Optional:   true,
 									CustomType: fwtypes.TimeRangeType{},
+									Validators: []validator.String{
+										fwvalidator.TimeRangeGreaterThan("0s"),
+									},
 								},
 								"max_delay": schema.StringAttribute{
 									Optional:   true,
 									CustomType: fwtypes.TimeRangeType{},
+									Validators: []validator.String{
+										fwvalidator.TimeRangeGreaterThan("0s"),
+									},
 								},
 								"disable_sampling": schema.BoolAttribute{
 									Optional: true,
+									Computed: true,
+									Default:  booldefault.StaticBool(false),
 								},
 								"timezone": schema.StringAttribute{
 									Optional: true,
@@ -330,9 +339,13 @@ func (rdw *ResourceDashboardWireframe) Schema(_ context.Context, _ resource.Sche
 								},
 								"show_data_markers": schema.BoolAttribute{
 									Optional: true,
+									Computed: true,
+									Default:  booldefault.StaticBool(false),
 								},
 								"show_legend": schema.BoolAttribute{
 									Optional: true,
+									Computed: true,
+									Default:  booldefault.StaticBool(true),
 								},
 								"show_event_lines": schema.BoolAttribute{
 									Optional: true,
@@ -344,6 +357,8 @@ func (rdw *ResourceDashboardWireframe) Schema(_ context.Context, _ resource.Sche
 								},
 								"stacked": schema.BoolAttribute{
 									Optional: true,
+									Computed: true,
+									Default:  booldefault.StaticBool(false),
 								},
 							},
 						},
@@ -408,8 +423,13 @@ func (rdw *ResourceDashboardWireframe) Schema(_ context.Context, _ resource.Sche
 									Computed: true,
 									Default:  booldefault.StaticBool(false),
 								},
-								"max_precision": schema.Int64Attribute{
+								"max_precision": schema.Int32Attribute{
 									Optional: true,
+									Computed: true,
+									Default:  int32default.StaticInt32(2),
+									Validators: []validator.Int32{
+										int32validator.Between(0, 10),
+									},
 								},
 								"time_range": schema.StringAttribute{
 									Optional:   true,
@@ -662,9 +682,82 @@ func (rdw *ResourceDashboardWireframe) ValidateConfig(ctx context.Context, req r
 		return
 	}
 
-	// Chart Colloisions detection
 	safe := make(map[string]*ResourceDashboardChartPositionType)
 	for _, chart := range model.Charts {
+		switch {
+		case chart.HeatMap != nil:
+			req, diags := chart.NewHeatmapCreateUpdateChartRequest(ctx)
+			if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+				return
+			}
+			if err := rdw.Details().Client.ValidateChart(ctx, req); err != nil {
+				resp.Diagnostics.AddAttributeWarning(
+					path.Root("chart").AtSetValue(types.StringValue(chart.Name.ValueString())),
+					"Invalid Heatmap Chart",
+					fmt.Sprintf("The heatmap chart %q is invalid: %s", chart.Name.ValueString(), err.Error()),
+				)
+			}
+		case chart.List != nil:
+			req, diags := chart.NewListCreateUpdateChartRequest(ctx)
+			if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+				return
+			}
+			if err := rdw.Details().Client.ValidateChart(ctx, req); err != nil {
+				resp.Diagnostics.AddAttributeWarning(
+					path.Root("chart").AtSetValue(types.StringValue(chart.Name.ValueString())),
+					"Invalid List Chart",
+					fmt.Sprintf("The list chart %q is invalid: %s", chart.Name.ValueString(), err.Error()),
+				)
+			}
+		case chart.Table != nil:
+			req, diags := chart.NewTableCreateUpdateChartRequest(ctx)
+			if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+				return
+			}
+			if err := rdw.Details().Client.ValidateChart(ctx, req); err != nil {
+				resp.Diagnostics.AddAttributeWarning(
+					path.Root("chart").AtSetValue(types.StringValue(chart.Name.ValueString())),
+					"Invalid Table Chart",
+					fmt.Sprintf("The table chart %q is invalid: %s", chart.Name.ValueString(), err.Error()),
+				)
+			}
+		case chart.SingleValue != nil:
+			req, diags := chart.NewSingleValueCreateUpdateChartRequest(ctx)
+			if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+				return
+			}
+			if err := rdw.Details().Client.ValidateChart(ctx, req); err != nil {
+				resp.Diagnostics.AddAttributeWarning(
+					path.Root("chart").AtSetValue(types.StringValue(chart.Name.ValueString())),
+					"Invalid Single Value Chart",
+					fmt.Sprintf("The single value chart %q is invalid: %s", chart.Name.ValueString(), err.Error()),
+				)
+			}
+		case chart.Text != nil:
+			req, diags := chart.NewTextCreateUpdateChartRequest(ctx)
+			if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+				return
+			}
+			if err := rdw.Details().Client.ValidateChart(ctx, req); err != nil {
+				resp.Diagnostics.AddAttributeWarning(
+					path.Root("chart").AtSetValue(types.StringValue(chart.Name.ValueString())),
+					"Invalid Text Chart",
+					fmt.Sprintf("The text chart %q is invalid: %s", chart.Name.ValueString(), err.Error()),
+				)
+			}
+		case chart.TimeSeries != nil:
+			req, diags := chart.NewTimeSeriesCreateUpdateChartRequest(ctx)
+			if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+				return
+			}
+			if err := rdw.Details().Client.ValidateChart(ctx, req); err != nil {
+				resp.Diagnostics.AddAttributeWarning(
+					path.Root("chart").AtSetValue(types.StringValue(chart.Name.ValueString())),
+					"Invalid Time Series Chart",
+					fmt.Sprintf("The time series chart %q is invalid: %s", chart.Name.ValueString(), err.Error()),
+				)
+			}
+		}
 		for named, pos := range safe {
 			if chart.Position.CheckCollision(pos) {
 				resp.Diagnostics.AddError(

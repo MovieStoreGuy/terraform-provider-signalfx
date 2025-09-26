@@ -1,3 +1,6 @@
+// Copyright Splunk, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package fwdashboard
 
 import (
@@ -57,7 +60,7 @@ type ResourceDashboardChartDataOptionType struct {
 	NoData            *ResourceDashboardChartNoDataOptionType `tfsdk:"no_data"`
 	RefreshInterval   fwtypes.TimeRange                       `tfsdk:"refresh_interval"`
 	HideMissingValues types.Bool                              `tfsdk:"hide_missing_values"`
-	MaxPrecision      types.Int64                             `tfsdk:"max_precision"`
+	MaxPrecision      types.Int32                             `tfsdk:"max_precision"`
 	UnitPrefix        types.String                            `tfsdk:"unit_prefix"`
 }
 
@@ -282,7 +285,7 @@ func (ch *ResourceDashboardChartType) NewSingleValueCreateUpdateChartRequest(ctx
 	}
 
 	if ch.SingleValue.ShowSparkline.ValueBool() {
-		singleValue.Options.ShowSparkline = &ch.SingleValue.ShowSparkline.ValueBool()
+		singleValue.Options.ShowSparkLine = ch.SingleValue.ShowSparkline.ValueBool()
 	}
 
 	return singleValue, diags
@@ -303,7 +306,7 @@ func (ch *ResourceDashboardChartType) NewTextCreateUpdateChartRequest(ctx contex
 		Description: ch.Description.ValueString(),
 		Options: &chart.Options{
 			Type:     "Text",
-			Markdown: ch.Text.Content.ValueString(),
+			Markdown: ch.Text.Markdown.ValueString(),
 		},
 	}
 	diags := ch.Tags.ElementsAs(ctx, &text.Tags, false)
@@ -335,8 +338,6 @@ func (ch *ResourceDashboardChartType) NewTimeSeriesCreateUpdateChartRequest(ctx 
 			HideMissingValues: ch.DataOptions.HideMissingValues.ValueBool(),
 			ColorBy:           ch.TimeSeries.Options.ColorBy.ValueString(),
 			IncludeZero:       ch.TimeSeries.Options.IncludeZero.ValueBool(),
-			ShowDataMarkers:   ch.TimeSeries.Options.ShowDataMarkers.ValueBool(),
-			ShowLegend:        ch.TimeSeries.Options.ShowLegend.ValueBool(),
 			ShowEventLines:    ch.TimeSeries.Options.ShowEventLints.ValueBool(),
 			SortBy:            ch.TimeSeries.Options.SortBy.ValueString(),
 			Stacked:           ch.TimeSeries.Options.Stacked.ValueBool(),
@@ -350,8 +351,8 @@ func (ch *ResourceDashboardChartType) NewTimeSeriesCreateUpdateChartRequest(ctx 
 	}
 
 	if !ch.DataOptions.MaxPrecision.IsNull() || !ch.DataOptions.MaxPrecision.IsUnknown() {
-		prec := int(ch.DataOptions.MaxPrecision.ValueInt64())
-		timeSeries.Options.MaxPrecision = &prec
+		prec := int32(ch.DataOptions.MaxPrecision.ValueInt32())
+		timeSeries.Options.MaximumPrecision = &prec
 	}
 
 	if !ch.Program.MinResolution.IsNull() || !ch.Program.MinResolution.IsUnknown() {
