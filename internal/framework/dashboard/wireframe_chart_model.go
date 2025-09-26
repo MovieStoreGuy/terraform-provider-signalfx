@@ -25,7 +25,7 @@ type ResourceDashboardChartType struct {
 	Text           *ResourceDashboardChartTextType           `tfsdk:"text"`
 	TimeSeries     *ResourceDashboardChartTimeSeriesType     `tfsdk:"time_series"`
 	SLO            *ResourceDashboardChartSLOType            `tfsdk:"slo"`
-	Program        *ResourceDashboardChartProgramOptionsType `tfsdk:"program"`
+	Program        *ResourceDashboardChartProgramOptionType  `tfsdk:"program"`
 	DataOptions    *ResourceDashboardChartDataOptionType     `tfsdk:"data_options"`
 	PublishOptions *ResourceDashboardChartPublishOptionsType `tfsdk:"publish_options"`
 }
@@ -68,14 +68,6 @@ type ResourceDashboardChartNoDataOptionType struct {
 	Message  types.String `tfsdk:"message"`
 	LinkText types.String `tfsdk:"link_text"`
 	LinkURL  types.String `tfsdk:"link_url"`
-}
-
-type ResourceDashboardChartProgramOptionsType struct {
-	Text            types.String      `tfsdk:"program"`
-	MinResolution   fwtypes.TimeRange `tfsdk:"min_resolution"`
-	MaxDelay        fwtypes.TimeRange `tfsdk:"max_delay"`
-	DisableSampling types.Bool        `tfsdk:"disable_sampling"`
-	Timezone        types.String      `tfsdk:"timezone"`
 }
 
 type ResourceDashboardChartHeatMapType struct {
