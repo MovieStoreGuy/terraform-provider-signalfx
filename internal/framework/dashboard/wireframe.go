@@ -21,6 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/signalfx/signalfx-go/chart"
 	"github.com/signalfx/signalfx-go/dashboard"
 
 	fwembed "github.com/splunk-terraform/terraform-provider-signalfx/internal/framework/embed"
@@ -306,7 +307,7 @@ func (rdw *ResourceDashboardWireframe) Schema(_ context.Context, _ resource.Sche
 						"text": schema.SingleNestedAttribute{
 							Optional: true,
 							Attributes: map[string]schema.Attribute{
-								"content": schema.StringAttribute{
+								"markdown": schema.StringAttribute{
 									Required: true,
 								},
 							},
@@ -457,11 +458,94 @@ func (rdw *ResourceDashboardWireframe) Create(ctx context.Context, req resource.
 			ch.ID = types.StringValue(created.Id)
 			charts[created.Id] = ch.Position
 		case ch.List != nil:
+			list, diag := ch.NewListCreateUpdateChartRequest(ctx)
+			if resp.Diagnostics.Append(diag...); resp.Diagnostics.HasError() {
+				return
+			}
+			created, err := rdw.Details().Client.CreateChart(ctx, list)
+			if err != nil {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("chart").AtSetValue(types.StringValue(ch.Name.ValueString())),
+					"Error Creating Chart",
+					fmt.Sprintf("An error was encountered creating the list chart %q: %s", ch.Name.ValueString(), err.Error()),
+				)
+				continue
+			}
+			ch.ID = types.StringValue(created.Id)
+			charts[created.Id] = ch.Position
 		case ch.Table != nil:
+			table, diags := ch.NewTableCreateUpdateChartRequest(ctx)
+			if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+				return
+			}
+			created, err := rdw.Details().Client.CreateChart(ctx, table)
+			if err != nil {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("chart").AtSetValue(types.StringValue(ch.Name.ValueString())),
+					"Error Creating Chart",
+					fmt.Sprintf("An error was encountered creating the table chart %q: %s", ch.Name.ValueString(), err.Error()),
+				)
+				continue
+			}
+			ch.ID = types.StringValue(created.Id)
+			charts[created.Id] = ch.Position
 		case ch.SingleValue != nil:
+			singleValue, diags := ch.NewSingleValueCreateUpdateChartRequest(ctx)
+			if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+				return
+			}
+			created, err := rdw.Details().Client.CreateChart(ctx, singleValue)
+			if err != nil {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("chart").AtSetValue(types.StringValue(ch.Name.ValueString())),
+					"Error Creating Chart",
+					fmt.Sprintf("An error was encountered creating the single value chart %q: %s", ch.Name.ValueString(), err.Error()),
+				)
+				continue
+			}
+			ch.ID = types.StringValue(created.Id)
+			charts[created.Id] = ch.Position
 		case ch.Text != nil:
+			text, diags := ch.NewTextCreateUpdateChartRequest(ctx)
+			if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+				return
+			}
+			created, err := rdw.Details().Client.CreateChart(ctx, text)
+			if err != nil {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("chart").AtSetValue(types.StringValue(ch.Name.ValueString())),
+					"Error Creating Chart",
+					fmt.Sprintf("An error was encountered creating the text chart %q: %s", ch.Name.ValueString(), err.Error()),
+				)
+				continue
+			}
+			ch.ID = types.StringValue(created.Id)
+			charts[created.Id] = ch.Position
 		case ch.TimeSeries != nil:
+			timeSeries, diags := ch.NewTimeSeriesCreateUpdateChartRequest(ctx)
+			if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
+				return
+			}
+			created, err := rdw.Details().Client.CreateChart(ctx, timeSeries)
+			if err != nil {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("chart").AtSetValue(types.StringValue(ch.Name.ValueString())),
+					"Error Creating Chart",
+					fmt.Sprintf("An error was encountered creating the time series chart %q: %s", ch.Name.ValueString(), err.Error()),
+				)
+				continue
+			}
+			ch.ID = types.StringValue(created.Id)
+			charts[created.Id] = ch.Position
 		case ch.SLO != nil:
+			created, err := rdw.Details().Client.CreateSloChart(ctx, &chart.CreateUpdateSloChartRequest{
+				SloId: ch.SLO.ID.ValueString(),
+			})
+			if resp.Diagnostics.Append(fwerr.ErrorHandler(ctx, resp.State, err)...); resp.Diagnostics.HasError() {
+				return
+			}
+			ch.ID = types.StringValue(created.Id)
+			charts[created.Id] = ch.Position
 		}
 	}
 

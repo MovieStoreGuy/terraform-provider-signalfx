@@ -94,7 +94,7 @@ type ResourceDashboardChartSingleValueType struct {
 }
 
 type ResourceDashboardChartTextType struct {
-	Content types.String `tfsdk:"content"`
+	Markdown types.String `tfsdk:"content"`
 }
 
 type ResourceDashboardChartTimeSeriesType struct {
@@ -193,4 +193,176 @@ func (ch *ResourceDashboardChartType) NewListCreateUpdateChartRequest(ctx contex
 	}
 
 	return list, nil
+}
+
+func (ch *ResourceDashboardChartType) NewTableCreateUpdateChartRequest(ctx context.Context) (*chart.CreateUpdateChartRequest, diag.Diagnostics) {
+	if ch.Table == nil || ch.DataOptions == nil || ch.Program == nil {
+		return nil, diag.Diagnostics{
+			diag.NewErrorDiagnostic(
+				"Missing Table definition",
+				"Cannot create table chart request without table, data options, and program defined",
+			),
+		}
+	}
+
+	table := &chart.CreateUpdateChartRequest{
+		Name:        ch.Name.ValueString(),
+		Description: ch.Description.ValueString(),
+		ProgramText: ch.Program.Text.ValueString(),
+		Options: &chart.Options{
+			Type:       "Table",
+			UnitPrefix: ch.DataOptions.UnitPrefix.ValueString(),
+			ProgramOptions: &chart.GeneralOptions{
+				DisableSampling: ch.Program.DisableSampling.ValueBool(),
+				Timezone:        ch.Program.Timezone.ValueString(),
+			},
+			HideMissingValues: ch.DataOptions.HideMissingValues.ValueBool(),
+		},
+	}
+	diags := ch.Tags.ElementsAs(ctx, &table.Tags, false)
+	diags.Append(ch.Table.GroupBy.ElementsAs(ctx, &table.Options.GroupBy, false)...)
+
+	if !ch.DataOptions.RefreshInterval.IsNull() || !ch.DataOptions.RefreshInterval.IsUnknown() {
+		dur := int32(ch.DataOptions.RefreshInterval.ValueDuration().Milliseconds())
+		table.Options.RefreshInterval = &dur
+	}
+
+	if !ch.Program.MinResolution.IsNull() || !ch.Program.MinResolution.IsUnknown() {
+		dur := int32(ch.Program.MinResolution.ValueDuration().Milliseconds())
+		table.Options.ProgramOptions.MinimumResolution = &dur
+	}
+
+	if !ch.Program.MaxDelay.IsNull() || !ch.Program.MaxDelay.IsUnknown() {
+		dur := int32(ch.Program.MaxDelay.ValueDuration().Milliseconds())
+		table.Options.ProgramOptions.MaxDelay = &dur
+	}
+
+	return table, diags
+}
+
+func (ch *ResourceDashboardChartType) NewSingleValueCreateUpdateChartRequest(ctx context.Context) (*chart.CreateUpdateChartRequest, diag.Diagnostics) {
+	if ch.SingleValue == nil || ch.DataOptions == nil || ch.Program == nil {
+		return nil, diag.Diagnostics{
+			diag.NewErrorDiagnostic(
+				"Missing Single Value definition",
+				"Cannot create single value chart request without single value, data options, and program defined",
+			),
+		}
+	}
+
+	singleValue := &chart.CreateUpdateChartRequest{
+		Name:        ch.Name.ValueString(),
+		Description: ch.Description.ValueString(),
+		ProgramText: ch.Program.Text.ValueString(),
+		Options: &chart.Options{
+			Type:       "SingleValue",
+			UnitPrefix: ch.DataOptions.UnitPrefix.ValueString(),
+			ProgramOptions: &chart.GeneralOptions{
+				DisableSampling: ch.Program.DisableSampling.ValueBool(),
+				Timezone:        ch.Program.Timezone.ValueString(),
+			},
+			HideMissingValues: ch.DataOptions.HideMissingValues.ValueBool(),
+		},
+	}
+	diags := ch.Tags.ElementsAs(ctx, &singleValue.Tags, false)
+
+	if !ch.DataOptions.RefreshInterval.IsNull() || !ch.DataOptions.RefreshInterval.IsUnknown() {
+		dur := int32(ch.DataOptions.RefreshInterval.ValueDuration().Milliseconds())
+		singleValue.Options.RefreshInterval = &dur
+	}
+
+	if !ch.Program.MinResolution.IsNull() || !ch.Program.MinResolution.IsUnknown() {
+		dur := int32(ch.Program.MinResolution.ValueDuration().Milliseconds())
+		singleValue.Options.ProgramOptions.MinimumResolution = &dur
+	}
+
+	if !ch.Program.MaxDelay.IsNull() || !ch.Program.MaxDelay.IsUnknown() {
+		dur := int32(ch.Program.MaxDelay.ValueDuration().Milliseconds())
+		singleValue.Options.ProgramOptions.MaxDelay = &dur
+	}
+
+	if ch.SingleValue.ShowSparkline.ValueBool() {
+		singleValue.Options.ShowSparkline = &ch.SingleValue.ShowSparkline.ValueBool()
+	}
+
+	return singleValue, diags
+}
+
+func (ch *ResourceDashboardChartType) NewTextCreateUpdateChartRequest(ctx context.Context) (*chart.CreateUpdateChartRequest, diag.Diagnostics) {
+	if ch.Text == nil || ch.DataOptions == nil {
+		return nil, diag.Diagnostics{
+			diag.NewErrorDiagnostic(
+				"Missing Text definition",
+				"Cannot create text chart request without text and data options defined",
+			),
+		}
+	}
+
+	text := &chart.CreateUpdateChartRequest{
+		Name:        ch.Name.ValueString(),
+		Description: ch.Description.ValueString(),
+		Options: &chart.Options{
+			Type:     "Text",
+			Markdown: ch.Text.Content.ValueString(),
+		},
+	}
+	diags := ch.Tags.ElementsAs(ctx, &text.Tags, false)
+
+	return text, diags
+}
+
+func (ch *ResourceDashboardChartType) NewTimeSeriesCreateUpdateChartRequest(ctx context.Context) (*chart.CreateUpdateChartRequest, diag.Diagnostics) {
+	if ch.TimeSeries == nil || ch.DataOptions == nil || ch.Program == nil || ch.TimeSeries.Options == nil {
+		return nil, diag.Diagnostics{
+			diag.NewErrorDiagnostic(
+				"Missing Time Series definition",
+				"Cannot create time series chart request without time series, time series options, data options, and program defined",
+			),
+		}
+	}
+
+	timeSeries := &chart.CreateUpdateChartRequest{
+		Name:        ch.Name.ValueString(),
+		Description: ch.Description.ValueString(),
+		ProgramText: ch.Program.Text.ValueString(),
+		Options: &chart.Options{
+			Type:       "TimeSeries",
+			UnitPrefix: ch.DataOptions.UnitPrefix.ValueString(),
+			ProgramOptions: &chart.GeneralOptions{
+				DisableSampling: ch.Program.DisableSampling.ValueBool(),
+				Timezone:        ch.Program.Timezone.ValueString(),
+			},
+			HideMissingValues: ch.DataOptions.HideMissingValues.ValueBool(),
+			ColorBy:           ch.TimeSeries.Options.ColorBy.ValueString(),
+			IncludeZero:       ch.TimeSeries.Options.IncludeZero.ValueBool(),
+			ShowDataMarkers:   ch.TimeSeries.Options.ShowDataMarkers.ValueBool(),
+			ShowLegend:        ch.TimeSeries.Options.ShowLegend.ValueBool(),
+			ShowEventLines:    ch.TimeSeries.Options.ShowEventLints.ValueBool(),
+			SortBy:            ch.TimeSeries.Options.SortBy.ValueString(),
+			Stacked:           ch.TimeSeries.Options.Stacked.ValueBool(),
+		},
+	}
+	diags := ch.Tags.ElementsAs(ctx, &timeSeries.Tags, false)
+
+	if !ch.DataOptions.RefreshInterval.IsNull() || !ch.DataOptions.RefreshInterval.IsUnknown() {
+		dur := int32(ch.DataOptions.RefreshInterval.ValueDuration().Milliseconds())
+		timeSeries.Options.RefreshInterval = &dur
+	}
+
+	if !ch.DataOptions.MaxPrecision.IsNull() || !ch.DataOptions.MaxPrecision.IsUnknown() {
+		prec := int(ch.DataOptions.MaxPrecision.ValueInt64())
+		timeSeries.Options.MaxPrecision = &prec
+	}
+
+	if !ch.Program.MinResolution.IsNull() || !ch.Program.MinResolution.IsUnknown() {
+		dur := int32(ch.Program.MinResolution.ValueDuration().Milliseconds())
+		timeSeries.Options.ProgramOptions.MinimumResolution = &dur
+	}
+
+	if !ch.Program.MaxDelay.IsNull() || !ch.Program.MaxDelay.IsUnknown() {
+		dur := int32(ch.Program.MaxDelay.ValueDuration().Milliseconds())
+		timeSeries.Options.ProgramOptions.MaxDelay = &dur
+	}
+
+	return timeSeries, diags
 }
