@@ -275,8 +275,9 @@ func (op *ollyProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 func (op *ollyProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		builtincontent.NewDashboardGroupsDataSource,
 		apm.NewDatasourceTopology,
+		builtincontent.NewDashboardGroupsDataSource,
+		builtincontent.NewAutoDetectorDataSource,
 	}
 }
 
